@@ -80,3 +80,61 @@ var showInventory = function() {
 	});
 }
 // Begin "buyProducts" function
+var buyProducts = function(){
+	// Prompt the user for desired purchase
+	console.log("What Item would you like to purchase? (Enter Item ID)");
+	connection.query("SELECT * FROM products", function (err, results){
+		// Begin inquirer prompt
+		inquirer
+			.prompt([
+				{
+					name: "itemID",
+					type: "input",
+					message: "Enter the ID of the item you would like to purchase: ",
+					validate: function (val){
+						if (isNan(val) === false) {
+							return true;
+						}
+						return false;
+					}
+				},
+				{
+					name: "itemAmount",
+					type: "input",
+					message: "How many of this item would you like?",
+					validate: function (val) {
+						if (isNaN(val) === false){
+							return true;
+						}
+						return false;
+					}
+				}
+			  ])
+			.then(function (solution){
+				// Evaluates the result of the purchase and either accepts or denies order
+				var item = solution.itemID;
+				var amount = solution.itemAmount;
+				var updateStock = results[item - 1].stock_quantity;
+				var newAmount = updateStock - amount;
+				var productPrice = results[solution.itemID - 1].price;
+				// Respond to user 
+				console.log("Your order has been processed!\n" + "Total Cost: " + amount * productPrice);
+
+				// Re-adjust inventory amount after purchase...
+				if (amount < updateStock) {
+					var query = connection,query("UPDATE products SET ? WHERE ?",
+						[
+						{ stock_quantity: newAmount },
+						{ item_id: item }
+						],
+						// --- PLACEHOLDER for updating inventory---- 
+						);
+					// Ordering more than what is available will result in an error.
+					} else {
+						console.log("Insufficient amount of product available. Please come back later!");
+					}
+					// console.log(query.sql);
+					startBamazon();
+		});		    
+	});
+};
