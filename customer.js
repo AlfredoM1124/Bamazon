@@ -72,10 +72,10 @@ var showInventory = function() {
 		});
 		// Loop through responses to Parse the information 
 		for (var i = 0; i < res.length; i++) {
-			table.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]);
+			cliTable.push([res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]);
 		}
 		// Display results in Command Line
-		console.log(table.toString());
+		console.log(cliTable.toString());
 		startBamazon();
 	});
 }
@@ -138,3 +138,31 @@ var buyProducts = function(){
 		});		    
 	});
 };
+
+// Begin lowInventory functionality ...
+var lowInventory = function(){
+	console.log("These items are almost out of stock! \n");
+	// Uses MySQL query to filter through available products
+	connection.query("SELECT * FROM products", function (err, res){
+
+		if (err) throw err;
+		// If no error proceed to show inventory...
+		// Arrange inventory in CLI table
+		var cliTable = new table({
+			// Establish column heading
+			head: ["Item ID", "Product Name", "Department", "Price", "In Stock"],
+			colWidths: [15, 25, 20, 15, 15]
+		});
+
+		for (var i = 0; i < res.length; i++){
+			if (res[i].stock_quantity < 4) {
+				cliTable.push(
+					[res[i].item_id, res[i].product_name, res[i].department_name, res[i].price, res[i].stock_quantity]
+					);
+			}
+		}
+		// Render the produced table on the Command Line...
+		console.log(cliTable.toString());
+		startBamazon();
+	});
+}
